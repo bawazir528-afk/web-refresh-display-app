@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Web Refresh Display</string>
+    <string name="setup_title">إعداد الشاشة</string>
+    <string name="hint_url">رابط الصفحة (https://…)</string>
+    <string name="save">حفظ وفتح</string>
+    <string name="error_empty">أدخل رابطاً</string>
+    <string name="error_url">رابط غير صالح (يجب أن يبدأ بـ https://)</string>
+    <string name="loading">جارٍ التحميل…</string>
+    <string name="load_failed">تعذّر تحميل الصفحة</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="change_url">تغيير الرابط</string>
+    <string name="refresh">تحديث</string>
+    <string name="settings">الإعدادات</string>
+    <string name="refreshing">جارٍ التحديث…</string>
+    <string name="last_refresh">آخر تحديث: %1$s</string>
+    <string name="config_loaded">تم تحميل الإعدادات من ملف config.json</string>
+    <string name="config_missing">لم يُعثر على config.json — استخدم شاشة الإعداد</string>
+    <string name="toast_refreshed">تم تحديث الصفحة</string>
+</resources>

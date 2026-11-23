@@ -1,0 +1,7 @@
+{
+  "url": "",
+  "refreshSeconds": 60,
+  "toolbar": true,
+  "keepScreenOn": true,
+  "fullscreen": true
+}
