@@ -33,6 +33,7 @@ android {
                 storePassword storePass
                 keyAlias keyAliasV
                 keyPassword keyPass
+                storeType "PKCS12"
             }
         }
     }
