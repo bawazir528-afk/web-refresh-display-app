@@ -10,10 +10,9 @@
     <string name="retry">إعادة المحاولة</string>
     <string name="change_url">تغيير الرابط</string>
     <string name="refresh">تحديث</string>
+    <string name="exit">خروج</string>
     <string name="settings">الإعدادات</string>
     <string name="refreshing">جارٍ التحديث…</string>
     <string name="last_refresh">آخر تحديث: %1$s</string>
-    <string name="config_loaded">تم تحميل الإعدادات من ملف config.json</string>
-    <string name="config_missing">لم يُعثر على config.json — استخدم شاشة الإعداد</string>
     <string name="toast_refreshed">تم تحديث الصفحة</string>
 </resources>
