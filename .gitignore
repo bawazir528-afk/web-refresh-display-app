@@ -1,4 +1,4 @@
-﻿*.apk
+*.apk
 apk-output/
 
 *.terabox.uploading.cfg

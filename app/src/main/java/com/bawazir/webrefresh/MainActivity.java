@@ -1,4 +1,4 @@
-﻿package com.bawazir.webrefresh;
+package com.bawazir.webrefresh;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
