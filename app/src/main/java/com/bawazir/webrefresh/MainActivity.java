@@ -1,9 +1,8 @@
-package com.bawazir.webrefresh;
+﻿package com.bawazir.webrefresh;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,7 +16,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private View toolbar;
     private Button refreshBtn;
     private Button settingsBtn;
+    private Button exitBtn;
     private TextView statusText;
 
     private Config config;
@@ -53,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª (config.json Ø¥Ù† ÙˆÙØ¬Ø¯ØŒ ÙˆØ¥Ù„Ø§ Prefs)
         config = ConfigLoader.load(this);
 
         url = getIntent().getStringExtra(EXTRA_URL);
@@ -67,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Ø¨Ù‚Ø§Ø¡ Ø§Ù„Ø´Ø§Ø´Ø© Ù…Ø¶Ø§Ø¡Ø©
         if (config.keepScreenOn) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
@@ -81,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         refreshBtn = findViewById(R.id.refreshBtn);
         settingsBtn = findViewById(R.id.settingsBtn);
+        exitBtn = findViewById(R.id.exitBtn);
         statusText = findViewById(R.id.statusText);
 
         toolbar.setVisibility(config.toolbar ? View.VISIBLE : View.GONE);
@@ -95,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         s.setBuiltInZoomControls(false);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         s.setUserAgentString("Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36");
 
         web.setWebViewClient(new WebViewClient() {
@@ -104,9 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 Uri u = req.getUrl();
                 if (u == null) return false;
                 String host = u.getHost();
-                // Ø§Ù„Ø³Ù…Ø§Ø­ Ù„Ù„ØµÙØ­Ø© Ø§Ù„Ø£ØµÙ„ÙŠØ© ÙˆÙ†Ø·Ø§Ù‚Ø§ØªÙ‡Ø§ Ø§Ù„ÙØ±Ø¹ÙŠØ©
                 if (host != null && url != null && host.equals(Uri.parse(url).getHost())) return false;
-                // Ø§Ù„Ø³Ù…Ø§Ø­ Ù„ØµÙØ­Ø§Øª ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø§Ù„Ø´Ø§Ø¦Ø¹Ø©
                 if (host != null && (host.contains("accounts.") || host.contains("login"))) return false;
                 try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { }
                 return true;
@@ -121,7 +117,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onReceivedError(WebView v, WebResourceRequest req, WebResourceError err) {
-                if (req != null && req.isForMainFrame()) showError(err != null ? String.valueOf(err.getDescription()) : "unknown");
+                if (req != null && req.isForMainFrame()) {
+                    showError(err != null ? String.valueOf(err.getDescription()) : "unknown");
+                }
             }
 
             @SuppressWarnings("deprecation")
@@ -148,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
         refreshBtn.setOnClickListener(b -> refreshNow());
         settingsBtn.setOnClickListener(b -> startActivity(new Intent(this, SetupActivity.class)));
+        if (exitBtn != null) exitBtn.setOnClickListener(b -> finishAndRemoveTask());
 
         if (savedInstanceState != null) {
             web.restoreState(savedInstanceState);
@@ -179,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /** ØªØ­Ø¯ÙŠØ«: ÙŠØ³ØªØ¯Ø¹ÙŠ onRefresh() ÙÙŠ Ø§Ù„ØµÙØ­Ø© Ø¥Ù† ÙˆÙØ¬Ø¯ØªØŒ ÙˆØ¥Ù„Ø§ ÙŠÙØ¹ÙŠØ¯ ØªØ­Ù…ÙŠÙ„ URL. */
     private void refreshNow() {
         progress.setVisibility(View.VISIBLE);
         web.evaluateJavascript(
@@ -188,10 +186,8 @@ public class MainActivity extends AppCompatActivity {
                 v -> {
                     String r = (v == null) ? "" : v;
                     if (r.contains("reload") || r.contains("err") || r.contains("null")) {
-                        // onRefresh ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯ Ø£Ùˆ ÙØ´Ù„ â†’ Ø¥Ø¹Ø§Ø¯Ø© ØªØ­Ù…ÙŠÙ„ ÙƒØ§Ù…Ù„Ø©
                         load();
                     }
-                    // Ø¥Ø°Ø§ 'js' â†’ Ø§Ù„ØµÙØ­Ø© ØªÙˆÙ„Ù‘Øª Ø§Ù„ØªØ­Ø¯ÙŠØ« (onRefresh)Ø› onPageFinished Ù‚Ø¯ Ù„Ø§ ÙŠÙØ·Ù„Ù‚
                     if (r.contains("js")) {
                         markRefreshed();
                     }
@@ -267,12 +263,10 @@ public class MainActivity extends AppCompatActivity {
         if (web != null && web.canGoBack()) {
             web.goBack();
         } else {
-            // ÙƒØ´Ùƒ: Ù„Ø§ ØªØ®Ø±Ø¬Ø› Ø£Ø¹Ø¯ ØªØ­Ù…ÙŠÙ„ Ø§Ù„ØµÙØ­Ø©
             load();
         }
     }
 
-    /** Ø¬Ø³ÙˆØ± Ø§Ù„ØµÙØ­Ø© â† Ø§Ù„ØªØ·Ø¨ÙŠÙ‚ */
     private class Bridges {
         @android.webkit.JavascriptInterface
         public void refresh() { runOnUiThread(() -> refreshNow()); }
@@ -297,6 +291,11 @@ public class MainActivity extends AppCompatActivity {
         @android.webkit.JavascriptInterface
         public void toast(String msg) {
             runOnUiThread(() -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show());
+        }
+
+        @android.webkit.JavascriptInterface
+        public void closeApp() {
+            runOnUiThread(MainActivity.this::finishAndRemoveTask);
         }
 
         @android.webkit.JavascriptInterface
